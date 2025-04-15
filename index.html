@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NebulonForge - Революция в создании Telegram ботов</title>
+    <style>
+        /* Основные стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Звездное небо */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Загрузочный экран */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000; /* Черный фон */
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-video-container {
+            width: 90vmin; /* Квадрат */
+            height: 90vmin; /* Квадрат */
+            position: relative;
+        }
+
+        .loading-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Секция заголовка */
+        .header {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title {
+            font-size: 8vw;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            text-align: center;
+            background: linear-gradient(90deg, #ffffff, #8a2be2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: titlePulse 4s infinite;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+        }
+
+        /* Контентная секция */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .section {
+            margin-bottom: 100px;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(15, 15, 25, 0.7);
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #fff;
+            text-transform: uppercase;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, #8a2be2, transparent);
+            border-radius: 2px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            padding: 25px;
+            border-radius: 15px;
+            background: rgba(20, 20, 35, 0.8);
+            box-shadow: 0 4px 20px rgba(138, 43, 226, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #8a2be2;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .feature-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #cccccc;
+            flex-grow: 1;
+        }
+
+        /* Кнопка */
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            margin-top: 40px;
+            background: linear-gradient(45deg, #8a2be2, #4b0082);
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Примечание мелким шрифтом */
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #999;
+            max-width: 800px;
+            margin: 60px auto 0;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid rgba(138, 43, 226, 0.2);
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.1) 100%);
+        }
+
+        .news-link {
+            color: #8a2be2;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .news-link:hover {
+            color: #b980ff;
+            text-decoration: underline;
+        }
+
+        /* Футер */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(to bottom, transparent, #000000);
+            margin-top: 100px;
+        }
+
+        footer p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Анимации */
+        @keyframes titlePulse {
+            0% {
+                text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 30px rgba(138, 43, 226, 0.8), 0 0 60px rgba(138, 43, 226, 0.4);
+            }
+            100% {
+                text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes starTwinkle {
+            0% {
+                opacity: 0.1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                opacity: 0.1;
+            }
+        }
+
+        .showcase {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 70px;
+        }
+
+        .showcase-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+            margin-bottom: 50px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #8a2be2, #4b0082);
+            border-radius: 4px;
+            transition: width 5.19s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 12vw;
+                letter-spacing: 5px;
+            }
+            
+            .feature-card {
+                min-height: 200px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Кастомные стили */
+        #loadingScreen {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+
+        #loadingVideoContainer {
+            position: relative;
+            width: 80vmin;
+            height: 80vmin;
+            max-width: 80vh;
+            max-height: 80vh;
+        }
+
+        #loadingVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-video-container" id="loadingVideoContainer">
+            <video class="loading-video" autoplay muted id="loadingVideo">
+                <source src="loading.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">Загрузка NebulonForge...</div>
+        </div>
+    </div>
+
+    <!-- Звездное небо -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- Основной контент -->
+    <header class="header">
+        <h1 class="title" id="mainTitle">Nebulon Forge</h1>
+    </header>
+
+    <main class="content" id="mainContent">
+        <section class="section" id="introduction">
+            <h2 class="section-title">Новая эра Telegram ботов</h2>
+            <p>NebulonForge открывает революционную эру, где искусственный интеллект будет создавать Telegram ботов за нас. Всё, что вы пожелаете, станет реальностью за считанные минуты.</p>
+            <div class="showcase">
+                <img src="https://via.placeholder.com/800x450?text=NebulonForge+Demo" alt="NebulonForge Demo" class="showcase-image" id="showcaseImage">
+            </div>
+        </section>
+
+        <section class="section" id="capabilities">
+            <h2 class="section-title">Возможности без границ</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">ChatGPT бот за 15 секунд</h3>
+                    <p class="feature-description">Нужен бот на основе искусственного интеллекта? NebulonForge создаст полноценного ChatGPT бота всего за 15 секунд и запустит без единой ошибки или проблемы!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛒</div>
+                    <h3 class="feature-title">Идеальный магазин в Telegram</h3>
+                    <p class="feature-description">Просто загрузите фотографии ваших товаров, сообщите цены, и NebulonForge создаст полноценный магазин с удобной навигацией и системой заказов.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3 class="feature-title">Авторизация для приложений</h3>
+                    <p class="feature-description">Нужен бот для авторизации пользователей в других приложениях? Ничего страшного, NebulonForge справится и с этой задачей легко и быстро!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Работа с базами данных</h3>
+                    <p class="feature-description">NebulonForge интегрируется с любыми базами данных, обеспечивая надежное хранение и быстрый доступ к вашей информации.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3 class="feature-title">Обработка изображений</h3>
+                    <p class="feature-description">Бот может работать с изображениями: создавать, редактировать, преобразовывать и анализировать графический контент на лету.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3 class="feature-title">Управление файлами</h3>
+                    <p class="feature-description">Создание, изменение, анализ файлов различных форматов — всё это доступно с NebulonForge без написания ни строчки кода.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="howItWorks">
+            <h2 class="section-title">Как это работает</h2>
+            <p>NebulonForge использует передовые алгоритмы искусственного интеллекта для автоматизации всего процесса создания ботов. Вам не нужно знать программирование, разбираться в API или изучать документацию Telegram Bot API.</p>
+            <p>Просто опишите своего идеального бота, укажите необходимые функции и особенности, и NebulonForge сделает всё остальное:</p>
+            <ul>
+                <li>Анализ ваших требований</li>
+                <li>Генерация кода на основе ИИ</li>
+                <li>Автоматическое тестирование и отладка</li>
+                <li>Развертывание и запуск бота</li>
+                <li>Мониторинг работы и устранение ошибок</li>
+            </ul>
+            <a href="#" class="cta-button" id="tryButton">Попробовать бесплатно</a>
+        </section>
+
+        <div class="disclaimer">
+            <p>* NebulonForge находится в бета-тестировании. Некоторые функции еще не были добавлены, поэтому не считайте, что бот способен на всё вышеперечисленное. Следите за новостями в нашем новостном канале <a href="https://t.me/Nebulon_news" class="news-link" target="_blank">@Nebulon_news</a></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 NebulonForge. Все права защищены.</p>
+        <p>Создано с использованием передовых технологий искусственного интеллекта.</p>
+    </footer>
+
+    <script>
+        // Создание звездного неба
+        function createStars() {
+            const starsContainer = document.getElementById('starsContainer');
+            const numberOfStars = 200;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3;
+                const opacity = Math.random() * 0.8 + 0.2;
+                const animationDuration = Math.random() * 3 + 2;
+                const delay = Math.random() * 5;
+                
+                star.style.position = 'absolute';
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.borderRadius = '50%';
+                star.style.backgroundColor = '#ffffff';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.opacity = opacity;
+                star.style.animation = `starTwinkle ${animationDuration}s infinite ${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Анимация загрузки
+        function handleLoading() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const progressFill = document.getElementById('progressFill');
+            const mainTitle = document.getElementById('mainTitle');
+            const mainContent = document.getElementById('mainContent');
+            const showcaseImage = document.getElementById('showcaseImage');
+            const sections = document.querySelectorAll('.section');
+            const featureCards = document.querySelectorAll('.feature-card');
+            const loadingVideo = document.getElementById('loadingVideo');
+
+            // Прогресс бар анимация
+            progressFill.style.width = '100%';
+
+            // После окончания загрузки (5.19 секунд)
+            setTimeout(() => {
+                // Плавное исчезновение экрана загрузки
+                loadingScreen.style.opacity = '0';
+
+                // Ждем завершения анимации исчезновения
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    
+                    // Показываем заголовок
+                    mainTitle.style.opacity = '1';
+                    mainTitle.style.transform = 'translateY(0)';
+                    
+                    // Показываем контент
+                    setTimeout(() => {
+                        mainContent.style.opacity = '1';
+                        mainContent.style.transform = 'translateY(0)';
+                        
+                        // Анимация для секций
+                        sections.forEach((section, index) => {
+                            setTimeout(() => {
+                                section.style.opacity = '1';
+                                section.style.transform = 'translateY(0)';
+                            }, 300 * index);
+                        });
+
+                        // Анимация для карточек
+                        featureCards.forEach((card, index) => {
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            }, 150 * index);
+                        });
+
+                        // Показываем демо-изображение
+                        setTimeout(() => {
+                            showcaseImage.style.opacity = '1';
+                            showcaseImage.style.transform = 'scale(1)';
+                        }, 500);
+                    }, 500);
+                }, 1000);
+            }, 5190);
+        }
+
+        // Эффект параллакса для звезд
+        function parallaxEffect() {
+            document.addEventListener('mousemove', (e) => {
+                const stars = document.querySelectorAll('.star');
+                const mouseX = e.clientX / window.innerWidth - 0.5;
+                const mouseY = e.clientY / window.innerHeight - 0.5;
+                
+                stars.forEach(star => {
+                    const depth = parseFloat(star.style.width) / 3;
+                    const moveX = mouseX * depth * 20;
+                    const moveY = mouseY * depth * 20;
+                    
+                    star.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                });
+            });
+        }
+
+        // Эффект появления при скролле
+        function scrollReveal() {
+            const sections = document.querySelectorAll('.section');
+            const featureCards = document.querySelectorAll('.feature-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            featureCards.forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // Интерактивные элементы
+        function setupInteractions() {
+            const tryButton = document.getElementById('tryButton');
+            
+            tryButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Создаем эффект пульсации при клике
+                tryButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    tryButton.style.transform = 'translateY(-5px)';
+                }, 200);
+                
+                // Здесь можно добавить модальное окно или перенаправление
+                alert('Спасибо за интерес к NebulonForge! Мы уведомим вас, когда начнется открытое бета-тестирование.');
+            });
+            
+            // Анимация заголовка при наведении
+            const mainTitle = document.getElementById('mainTitle');
+            mainTitle.addEventListener('mouseover', () => {
+                mainTitle.style.letterSpacing = '15px';
+                mainTitle.style.textShadow = '0 0 30px rgba(138, 43, 226, 0.8), 0 0 60px rgba(138, 43, 226, 0.4)';
+            });
+            
+            mainTitle.addEventListener('mouseout', () => {
+                mainTitle.style.letterSpacing = '10px';
+                mainTitle.style.textShadow = '0 0 10px rgba(138, 43, 226, 0.5)';
+            });
+            
+            // Анимация карточек при наведении
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach(card => {
+                card.addEventListener('mouseover', () => {
+                    card.style.transform = 'translateY(-10px)';
+                    card.style.boxShadow = '0 10px 30px rgba(138, 43, 226, 0.3)';
+                });
+                
+                card.addEventListener('mouseout', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = '0 4px 20px rgba(138, 43, 226, 0.15)';
+                });
+            });
+        }
+
+        // Эффект волны для фона
+        function createWaveEffect() {
+            const waveCanvas = document.createElement('canvas');
+            const ctx = waveCanvas.getContext('2d');
+            waveCanvas.style.position = 'fixed';
+            waveCanvas.style.top = '0';
+            waveCanvas.style.left = '0';
+            waveCanvas.style.width = '100%';
+            waveCanvas.style.height = '100%';
+            waveCanvas.style.pointerEvents = 'none';
+            waveCanvas.style.zIndex = '-2';
+            document.body.appendChild(waveCanvas);
+            
+            function resizeCanvas() {
+                waveCanvas.width = window.innerWidth;
+                waveCanvas.height = window.innerHeight;
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            let phase = 0;
+            
+            function drawWaves() {
+                ctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+                
+                const gradient = ctx.createLinearGradient(0, 0, waveCanvas.width, waveCanvas.height);
+                gradient.addColorStop(0, 'rgba(75, 0, 130, 0.05)');
+                gradient.addColorStop(1, 'rgba(138, 43, 226, 0.1)');
+                
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    
+                    const amplitude = 20 + i * 10;
+                    const period = 0.01 - i * 0.002;
+                    const phaseShift = phase + i * Math.PI / 4;
+                    
+                    ctx.moveTo(0, waveCanvas.height / 2);
+                    
+                    for (let x = 0; x < waveCanvas.width; x++) {
+                        const y = waveCanvas.height / 2 + 
+                                 Math.sin(x * period + phaseShift) * amplitude + 
+                                 Math.sin(x * period * 2 + phaseShift * 1.5) * amplitude / 2;
+                        
+                        ctx.lineTo(x, y);
+                    }
+                    
+                    ctx.lineTo(waveCanvas.width, waveCanvas.height);
+                    ctx.lineTo(0, waveCanvas.height);
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                }
+                
+                phase += 0.01;
+                requestAnimationFrame(drawWaves);
+            }
+            
+            drawWaves();
+        }
+
+        // Анимация текста по буквам
+        function typewriterEffect() {
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const paragraphs = section.querySelectorAll('p');
+                            
+                            paragraphs.forEach((para, index) => {
+                                const originalText = para.textContent;
+                                para.textContent = '';
+                                para.style.opacity = '1';
+                                
+                                setTimeout(() => {
+                                    let i = 0;
+                                    const typing = setInterval(() => {
+                                        if (i < originalText.length) {
+                                            para.textContent += originalText.charAt(i);
+                                            i++;
+                                        } else {
+                                            clearInterval(typing);
+                                        }
+                                    }, 20);
+                                }, index * 1000);
+                            });
+                            
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(section);
+            });
+        }
+
+        // Динамическое изменение цвета фона
+        function dynamicBackground() {
+            let hue = 270; // Фиолетовый
+            const body = document.body;
+            
+            setInterval(() => {
+                hue = (hue + 0.1) % 360;
+                if (hue > 290) hue = 260; // Держимся в фиолетовой гамме
+                
+                document.documentElement.style.setProperty('--bg-hue', hue);
+                body.style.background = `radial-gradient(circle at center, #150a20 0%, #0a0a0f 100%)`;
+            }, 100);
+        }
+
+        // Дополнительные эффекты для элементов
+        function enhanceElements() {
+            // Создаем эффект орбит для секций
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach((section, index) => {
+                for (let i = 0; i < 3; i++) {
+                    const orbit = document.createElement('div');
+                    orbit.className = 'orbit';
+                    
+                    const size = 100 + i * 50;
+                    const duration = 20 + i * 5;
+                    
+                    orbit.style.position = 'absolute';
+                    orbit.style.width = `${size}px`;
+                    orbit.style.height = `${size}px`;
+                    orbit.style.borderRadius = '50%';
+                    orbit.style.border = '1px solid rgba(138, 43, 226, 0.1)';
+                    orbit.style.top = `-${size / 2}px`;
+                    orbit.style.left = `-${size / 2}px`;
+                    orbit.style.transform = `translate(${Math.random() * 100}%, ${Math.random() * 100}%)`;
+                    orbit.style.animation = `float ${duration}s infinite linear`;
+                    orbit.style.zIndex = '-1';
+                    
+                    section.style.position = 'relative';
+                    section.style.overflow = 'hidden';
+                    section.appendChild(orbit);
+                }
+            });
+        }
+
+        // Запуск всех эффектов при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            handleLoading();
+            parallaxEffect();
+            scrollReveal();
+            setupInteractions();
+            createWaveEffect();
+            dynamicBackground();
+            enhanceElements();
+            
+            // Запускаем typewriter эффект с задержкой после загрузки
+            setTimeout(typewriterEffect, 6000);
+            
+            // Дополнительные интерактивные элементы
+            document.querySelectorAll('a').forEach(link => {
+                if (!link.classList.contains('cta-button')) {
+                    link.addEventListener('mouseover', () => {
+                        link.style.textShadow = '0 0 10px rgba(138, 43, 226, 0.8)';
+                    });
+                    
+                    link.addEventListener('mouseout', () => {
+                        link.style.textShadow = 'none';
+                    });
+                }
+            });
+            
+            // Создание интерактивных частиц при клике
+            document.addEventListener('click', (e) => {
+                createParticleEffect(e.clientX, e.clientY);
+            });
+        });
+
+        // Функция создания частиц при клике
+        function createParticleEffect(x, y) {
+            const particlesContainer = document.createElement('div');
+            particlesContainer.style.position = 'fixed';
+            particlesContainer.style.zIndex = '100';
+            particlesContainer.style.pointerEvents = 'none';
+            document.body.appendChild(particlesContainer);
+            
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                
+                // Случайный размер частицы
+                const size = Math.random() * 10 + 5;
+                
+                // Случайный цвет от фиолетового до голубого
+                const hue = 260 + Math.random() * 60;
+                const color = `hsl(${hue}, 100%, 70%)`;
+                
+                particle.style.position = 'absolute';
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = color;
+                particle.style.borderRadius = '50%';
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.pointerEvents = 'none';
+                particle.style.opacity = '0.8';
+                
+                // Случайное направление и скорость
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                
+                particlesContainer.appendChild(particle);
+                
+                // Анимация частицы
+                let posX = x;
+                let posY = y;
+                let opacity = 0.8;
+                let scale = 1;
+                
+                const animateParticle = () => {
+                    if (opacity <= 0) {
+                        particlesContainer.removeChild(particle);
+                        if (particlesContainer.childNodes.length === 0) {
+                            document.body.removeChild(particlesContainer);
+                        }
+                        return;
+                    }
+                    
+                    posX += vx;
+                    posY += vy;
+                    opacity -= 0.02;
+                    scale -= 0.01;
+                    
+                    particle.style.left = `${posX}px`;
+                    particle.style.top = `${posY}px`;
+                    particle.style.opacity = opacity;
+                    particle.style.transform = `scale(${scale})`;
+                    
+                    requestAnimationFrame(animateParticle);
+                };
+                
+                animateParticle();
+            }
+        }
+
+        // Эффект неоновых линий
+        function createNeonLines() {
+            const neonLinesContainer = document.createElement('div');
+            neonLinesContainer.style.position = 'fixed';
+            neonLinesContainer.style.top = '0';
+            neonLinesContainer.style.left = '0';
+            neonLinesContainer.style.width = '100%';
+            neonLinesContainer.style.height = '100%';
+            neonLinesContainer.style.pointerEvents = 'none';
+            neonLinesContainer.style.zIndex = '-3';
+            document.body.appendChild(neonLinesContainer);
+            
+            const linesCount = 5;
+            
+            for (let i = 0; i < linesCount; i++) {
+                const line = document.createElement('div');
+                
+                line.style.position = 'absolute';
+                line.style.height = '1px';
+                line.style.width = '100%';
+                line.style.top = `${Math.random() * 100}%`;
+                line.style.background = 'linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.5), transparent)';
+                line.style.opacity = '0';
+                line.style.transform = 'translateY(0)';
+                
+                neonLinesContainer.appendChild(line);
+                
+                // Анимация линии
+                (function animateLine() {
+                    // Скрываем линию
+                    line.style.opacity = '0';
+                    
+                    // Случайное положение для следующей анимации
+                    const newTop = Math.random() * 100;
+                    setTimeout(() => {
+                        line.style.top = `${newTop}%`;
+                        
+                        // Показываем линию
+                        line.style.opacity = '0.7';
+                        
+                        // И снова скрываем через некоторое время
+                        setTimeout(() => {
+                            line.style.opacity = '0';
+                            
+                            // Повторяем анимацию через случайный интервал
+                            setTimeout(animateLine, Math.random() * 5000 + 2000);
+                        }, 1000);
+                    }, 500);
+                })();
+            }
+        }
+        
+        // Запускаем дополнительные эффекты с задержкой
+        setTimeout(createNeonLines, 7000);
+
+        // Добавляем эффект параллакса для заголовков
+        function setupParallaxTitles() {
+            const titles = document.querySelectorAll('.section-title');
+            
+            window.addEventListener('scroll', () => {
+                titles.forEach(title => {
+                    const rect = title.getBoundingClientRect();
+                    const center = (rect.top + rect.bottom) / 2;
+                    const viewportCenter = window.innerHeight / 2;
+                    
+                    const distance = center - viewportCenter;
+                    const parallaxStrength = distance * 0.03;
+                    
+                    title.style.transform = `translateX(${parallaxStrength}px)`;
+                });
+            });
+        }
+        
+        // Инициализируем параллакс заголовков после загрузки
+        setTimeout(setupParallaxTitles, 6500);
+        
+        // Эффект следящих элементов
+        function setupTrackingEyes() {
+            const icons = document.querySelectorAll('.feature-icon');
+            
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                
+                icons.forEach(icon => {
+                    const rect = icon.getBoundingClientRect();
+                    const iconX = rect.left + rect.width / 2;
+                    const iconY = rect.top + rect.height / 2;
+                    
+                    const angleX = (mouseX - iconX) / window.innerWidth * 10;
+                    const angleY = (mouseY - iconY) / window.innerHeight * 10;
+                    
+                    icon.style.transform = `translate(${angleX}px, ${angleY}px)`;
+                });
+            });
+        }
+        
+        // Активируем следящие элементы
+        setTimeout(setupTrackingEyes, 7000);
+        
+        // Добавляем эффект плавающих кнопок
+        function setupFloatingButtons() {
+            const buttons = document.querySelectorAll('.cta-button');
+            
+            buttons.forEach(button => {
+                let phase = Math.random() * Math.PI * 2;
+                
+                setInterval(() => {
+                    phase += 0.05;
+                    const yOffset = Math.sin(phase) * 5;
+                    
+                    button.style.transform = `translateY(${yOffset}px)`;
+                }, 50);
+            });
+        }
+        
+        // Активируем плавающие кнопки
+        setTimeout(setupFloatingButtons, 7500);
+        
+        // Создаем эффект размытия при прокрутке
+        function setupScrollBlur() {
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY;
+                const maxBlur = 10;
+                const triggerPosition = 300;
+                
+                const blurValue = Math.min(scrollPosition / triggerPosition * maxBlur, maxBlur);
+                
+                document.getElementById('mainTitle').style.filter = `blur(${blurValue / 10}px)`;
+                document.querySelector('.header').style.backdropFilter = `blur(${blurValue}px)`;
+            });
+        }
+        
+        // Активируем эффект размытия при прокрутке
+        setTimeout(setupScrollBlur, 8000);
+        
+        // Добавляем эффект ночного режима
+        function setupDarkModeToggle() {
+            // Создаем переключатель
+            const darkModeToggle = document.createElement('div');
+            darkModeToggle.className = 'dark-mode-toggle';
+            darkModeToggle.innerHTML = '🌙';
+            darkModeToggle.style.position = 'fixed';
+            darkModeToggle.style.top = '20px';
+            darkModeToggle.style.right = '20px';
+            darkModeToggle.style.width = '40px';
+            darkModeToggle.style.height = '40px';
+            darkModeToggle.style.borderRadius = '50%';
+            darkModeToggle.style.backgroundColor = 'rgba(20, 20, 35, 0.7)';
+            darkModeToggle.style.boxShadow = '0 0 10px rgba(138, 43, 226, 0.5)';
+            darkModeToggle.style.display = 'flex';
+            darkModeToggle.style.justifyContent = 'center';
+            darkModeToggle.style.alignItems = 'center';
+            darkModeToggle.style.cursor = 'pointer';
+            darkModeToggle.style.zIndex = '1000';
+            darkModeToggle.style.transition = 'all 0.3s ease';
+            
+            document.body.appendChild(darkModeToggle);
+            
+            let isDarkMode = true;
+            
+            darkModeToggle.addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                
+                if (isDarkMode) {
+                    document.body.style.backgroundColor = '#0a0a0f';
+                    darkModeToggle.innerHTML = '🌙';
+                } else {
+                    document.body.style.backgroundColor = '#1a1a2f';
+                    darkModeToggle.innerHTML = '☀️';
+                }
+                
+                // Анимация переключения
+                document.body.style.transition = 'background-color 1s ease';
+                darkModeToggle.style.transform = 'rotate(360deg)';
+                setTimeout(() => {
+                    darkModeToggle.style.transform = 'rotate(0)';
+                }, 500);
+            });
+            
+            // Анимация появления переключателя
+            darkModeToggle.style.opacity = '0';
+            darkModeToggle.style.transform = 'scale(0)';
+            
+            setTimeout(() => {
+                darkModeToggle.style.opacity = '1';
+                darkModeToggle.style.transform = 'scale(1)';
+            }, 9000);
+        }
+        
+        // Активируем переключатель темного режима
+        setTimeout(setupDarkModeToggle, 8500);
+        
+        // Эффект интерактивной волны при скролле
+        function setupScrollWaves() {
+            const waveCanvas = document.createElement('canvas');
+            const ctx = waveCanvas.getContext('2d');
+            
+            waveCanvas.style.position = 'fixed';
+            waveCanvas.style.top = '0';
+            waveCanvas.style.left = '0';
+            waveCanvas.style.width = '100%';
+            waveCanvas.style.height = '100%';
+            waveCanvas.style.pointerEvents = 'none';
+            waveCanvas.style.zIndex = '-4';
+            waveCanvas.style.opacity = '0.2';
+            
+            document.body.appendChild(waveCanvas);
+            
+            function resizeCanvas() {
+                waveCanvas.width = window.innerWidth;
+                waveCanvas.height = window.innerHeight;
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            let scrollPhase = 0;
+            
+            window.addEventListener('scroll', () => {
+                scrollPhase = window.scrollY * 0.002;
+            });
+            
+            function drawScrollWaves() {
+                ctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+                
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    
+                    const amplitude = 50 - i * 10;
+                    const period = 0.005;
+                    const phaseShift = scrollPhase + i * 0.5;
+                    const verticalOffset = i * waveCanvas.height / 5;
+                    
+                    ctx.moveTo(0, verticalOffset);
+                    
+                    for (let x = 0; x < waveCanvas.width; x += 5) {
+                        const y = verticalOffset + Math.sin(x * period + phaseShift) * amplitude;
+                        ctx.lineTo(x, y);
+                    }
+                    
+                    ctx.strokeStyle = `rgba(138, 43, 226, ${0.1 - i * 0.02})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                
+                requestAnimationFrame(drawScrollWaves);
+            }
+            
+            drawScrollWaves();
+        }
+        
+        // Активируем эффект волн при скролле
+        setTimeout(setupScrollWaves, 9000);
+        
+        // Создаем эффект кастомного курсора
+        function setupCustomCursor() {
+            const cursor = document.createElement('div');
+            const cursorDot = document.createElement('div');
+            
+            // Основной курсор (кольцо)
+            cursor.style.position = 'fixed';
+            cursor.style.width = '40px';
+            cursor.style.height = '40px';
+            cursor.style.borderRadius = '50%';
+            cursor.style.border = '2px solid rgba(138, 43, 226, 0.5)';
+            cursor.style.pointerEvents = 'none';
+            cursor.style.zIndex = '9999';
+            cursor.style.transform = 'translate(-50%, -50%)';
+            cursor.style.transition = 'width 0.2s, height 0.2s, background-color 0.2s';
+            
+            // Точка курсора
+            cursorDot.style.position = 'fixed';
+            cursorDot.style.width = '8px';
+            cursorDot.style.height = '8px';
+            cursorDot.style.borderRadius = '50%';
+            cursorDot.style.backgroundColor = 'rgba(138, 43, 226, 0.8)';
+            cursorDot.style.pointerEvents = 'none';
+            cursorDot.style.zIndex = '10000';
+            cursorDot.style.transform = 'translate(-50%, -50%)';
+            
+            document.body.appendChild(cursor);
+            document.body.appendChild(cursorDot);
+            
+            // Обновляем позицию курсора
+            document.addEventListener('mousemove', (e) => {
+                cursorDot.style.left = `${e.clientX}px`;
+                cursorDot.style.top = `${e.clientY}px`;
+                
+                // Задержка для кольца
+                setTimeout(() => {
+                    cursor.style.left = `${e.clientX}px`;
+                    cursor.style.top = `${e.clientY}px`;
+                }, 50);
+            });
+            
+            // Эффект при наведении на интерактивные элементы
+            const interactiveElements = document.querySelectorAll('a, button, .feature-card, .cta-button');
+            
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', () => {
+                    cursor.style.width = '60px';
+                    cursor.style.height = '60px';
+                    cursor.style.backgroundColor = 'rgba(138, 43, 226, 0.1)';
+                    cursor.style.mixBlendMode = 'difference';
+                });
+                
+                element.addEventListener('mouseleave', () => {
+                    cursor.style.width = '40px';
+                    cursor.style.height = '40px';
+                    cursor.style.backgroundColor = 'transparent';
+                    cursor.style.mixBlendMode = 'normal';
+                });
+            });
+            
+            // Эффект при клике
+            document.addEventListener('mousedown', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                cursorDot.style.transform = 'translate(-50%, -50%) scale(0.8)';
+            });
+            
+            document.addEventListener('mouseup', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursorDot.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
+            
+            // Скрываем стандартный курсор
+            document.body.style.cursor = 'none';
+            interactiveElements.forEach(element => {
+                element.style.cursor = 'none';
+            });
+        }
+        
+        // Включаем кастомный курсор
+        setTimeout(setupCustomCursor, 9500);
+    </script>
+</body>
+</html>
+
